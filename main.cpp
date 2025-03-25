@@ -1,33 +1,34 @@
-#include "bytes.h"
-#include "file.h"
-
 #include <stdio.h>
 
-#pragma pack(push, 1)
-typedef struct MockHeader
-{
-    uint16_t field1;
-    uint32_t field2;
-    uint8_t field3;
-};
-#pragma pack(pop)
+#include "bytes.h"
+#include "file.h"
+#include "esfheader.h"
 
 
 int main()
 {
+    const char* expected_cwd = "/home/nemo/src/util";
+    bool islittle = is_little_endian();
+
     char cwd[256] = { 0 };
-    if (getcwd(cwd, sizeof(cwd)) != NULL)
+
+    if (GET_CURRENT_DIR(cwd) != NULL)
     {
         printf("CWD: %s\n", cwd);
+        if (strcmp(cwd, expected_cwd) == 0)
+        {
+            FileInfo fileInfo = GET_FILE_INFO("test.txt");
+            
+        }
     }
 
+    // TODO: check acceptable windows formats for paths
     if(CREATE_DIR_R("../tempdir/newdir") != 0)
     {
+        //TODO: can handle error codes...
         printf("fail sauce\n");
     }
-    
 
-    bool islittle = is_little_endian();
 
     uint32_t reverse = 0xEFBEADDE;
     printf("reverse %X\n", reverse);
@@ -36,20 +37,21 @@ int main()
 
     FILE* f = fopen("test.txt", "rb");
 
-    MockHeader outHeader = {0};
+    ESFHeader outHeader = {0};
     sread_bytes(f, outHeader);
 
-    PRINT_VALUE_STRING(outHeader.field1);
-    sreversebytes(outHeader.field1);
-    PRINT_VALUE_STRING(outHeader.field1);
 
-    PRINT_VALUE_STRING(outHeader.field2);
-    sreversebytes(outHeader.field2);
-    PRINT_VALUE_STRING(outHeader.field2);
+    PRINT_VALUE_STRING(outHeader.magic);
+    sreversebytes(outHeader.magic);
+    PRINT_VALUE_STRING(outHeader.magic);
 
-    PRINT_VALUE_STRING(outHeader.field3, 0);
-    sreversebytes(outHeader.field3);
-    PRINT_VALUE_STRING(outHeader.field3);
+    PRINT_VALUE_STRING(outHeader.objectCount);
+    sreversebytes(outHeader.objectCount);
+    PRINT_VALUE_STRING(outHeader.objectCount);
+
+    PRINT_VALUE_STRING(outHeader.unknown1, '\0');
+    sreversebytes(outHeader.unknown1);
+    PRINT_VALUE_STRING(outHeader.unknown1);
     
     PRINT_VALUE_STRING(outHeader, '\n');
 

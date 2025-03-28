@@ -47,6 +47,11 @@ Function Declarations:
 #include <sys/types.h>
 #include <sys/stat.h>
 
+typedef struct
+{
+    int32_t count;
+    int32_t sizes[10];
+} StructMap;
 
 typedef struct _timespec
 {
@@ -106,12 +111,14 @@ typedef struct _fileinfo
     //     // handle result...
     // }
 
+
     #define CREATE_DIR(path, ...) _mkdir(path)
     #define CREATE_DIR_R(path, ...) _mkdir_r(path, 0)
 
     #define GET_CURRENT_DIR(buffer) _getcwd(buffer, sizeof(buffer))
     #define GET_FILE_INFO(path) _get_file_info(path)
     // _chdir(path) change pwd
+    #define CHANGE_CWD(path) _change_cwd(path)
 
     typedef struct _stat _FileStat;
     /*
@@ -149,6 +156,8 @@ typedef struct _fileinfo
     #define CREATE_DIR(...) __GET_MACRO(__VA_ARGS__, __CREATE_DIR_BOTH, __CREATE_DIR_PATH)(__VA_ARGS__)
     #define CREATE_DIR_R(...) __GET_MACRO(__VA_ARGS__, __CREATE_DIR_R_BOTH, __CREATE_DIR_R_PATH)(__VA_ARGS__)
 
+
+    #define CHANGE_CWD(path) _change_cwd(path)
     #define GET_CURRENT_DIR(buffer) getcwd(buffer, sizeof(buffer))
     #define GET_FILE_INFO(path) _get_file_info(path)
 
@@ -226,6 +235,24 @@ static FileInfo _get_file_info(const char* path)
     // st_uid
 
     return out;
+}
+
+static bool _change_cwd(const char* path)
+{
+    int result = 0;
+    #ifdef _WIN32
+        result = _chdir(path);
+    #endif
+        result = chdir(path);
+    
+    if (result != 0)
+    {
+        // TODO
+        //perror()
+        return false;
+    }
+
+    return true;
 }
 
 static int _mkdir_r(const char* path, unsigned int mode = 0)
@@ -321,6 +348,35 @@ static void _reversebytes(void* value, size_t length)
 	}
 }
 
+static void _reverse_struct_bytes(void*, size_t, const uint8_t*, size_t);
+#define REVERSE_STRUCT_BYTES(structData, structMap) _reverse_struct_bytes(&(structData), sizeof(structData), structMap, sizeof(structMap))
+static void _reverse_struct_bytes(void* structData, size_t dataSize, const uint8_t* map, size_t mapSize)
+{
+    size_t offset = 0;
+
+    int32_t sum = 0;
+    // Sum the map values
+    for (int32_t i = 0; i < mapSize; i++)
+    {
+        sum += map[i];
+    }
+    
+    // Check the values in map add up to the size of the struct
+    if (dataSize != sum)
+    {
+        // TODO: error return vals?
+
+        return;
+    }
+
+    for (int32_t i = 0; i < mapSize; i++)
+    {
+        _reversebytes(structData + offset, map[i]);
+        offset += map[i];
+    }
+    
+}
+
 static void _read_bytes(FILE*, void*, size_t);
 #define sread_bytes(filePtr, dest) _read_bytes(filePtr, &(dest), sizeof(dest))
 static void _read_bytes(FILE* file, void* dest, size_t size)
@@ -363,3 +419,50 @@ void _print_as_byte_string(void* value, size_t size, unsigned char end = ' ')
 } 
 
 #endif
+
+/*
+FILE HEADER:
+            |    FJBO   | obj count | file type |  unknown  |         offset        |        unknown        |
+            |46 4a 42 4f|01 00 00 00|4f ab 00 00|00 00 00 00|20 00 00 00 00 00 00 00|ff ff ff ff ff ff ff ff|
+OBJECT HEADER:
+            |type | ver |   length  |  children |      data
+    root    |00 80|00 00|d7 aa 70 3b|02 00 00 00|
+   world    |00 81|00 00|17 62 70 3b|af 00 00 00|
+    zone    |00 30|01 00|4c 7d 22 00|04 00 00 00|
+ zone resc  |00 31|00 00|0c bc 21 00|04 01 00 00|
+mat palette |10 11|01 00|f7 0d 03 00|03 00 00 00|
+  mat p hdr |11 11|01 00|04 00 00 00|00 00 00 00|a3 5b b2 0a < id?
+surface arr |01 10|00 00|d3 0c 03 00|03 00 00 00|
+                                                |                            surface header                             |   palette color cnt in length   |
+                                                |     id    |   width   |   height  |   depth   |    mip    | color cnt |   RGBA    |
+  surface   |00 10|00 00|8d 59 00 00|00 00 00 00|4d 67 c9 43|80 00 00 00|80 00 00 00|01 00 00 00|08 00 00 00|00 01 00 00|07 34 38 ff|02363aff023a3dff063a3eff083a3fff183c3fff153a3dff063b40ff063c41ff0c3e43ff093e42ff0b3f44ff143e42ff1b3e41ff0b4044ff0e4146ff0c4045ff0f4246ff134346ff124246ff104347ff154246ff1b4245ff174348ff114348ff124549ff134449ff154549ff15464aff16474bff15474cff16474cff1a474cff19464aff1d4649ff17484bff16494dff17484cff1d494cff19494eff18494dff1a4a4fff1e4a4eff1c4b4fff0a4e53ff164e52ff1d4f54ff1b4b50ff1e4b50ff
+            
+     **0083 - 5A10 -> should be texture data? (surface)       
+           049B end palette colors 
+            049C number of mip maps, start with width x height pixels, then divide by 2 for each mip map
+            128x128  4000
+            64x64    1000
+            32x32     400
+            16x16     100
+            8x8        40
+            4x4        10
+            2x2         4
+            1x1         1
+                     5555 ->  59F0 (end of surface data?)
+            
+
+            049C - 80 00 00 00
+            44A0 - 40 00 00 00
+            54A4 - 20 00 00 00
+            58A8 - 10 00 00 00
+            59AD - 08 00 00 00
+            59F0 - 04 00 00 00 (mip size) 16 bytes
+            5A04 - 02 00 00 00             4 bytes
+            5A0C - 01 00 00 00             1 byte
+            5A11 - 00 10 00 00 - next surface header
+            
+            5E35 end surface 2 palette
+
+
+
+*/

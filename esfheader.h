@@ -1,8 +1,10 @@
 #pragma once
 #include <stdint.h>
 #include "file.h"
+// #include "uthash.h"
+#include "dictionary.h"
 
-#define ESF_MAGIC 0x4F424A46;
+const int32_t ESF_MAGIC = 0x4F424A46;
 
 #pragma pack(push, 1)
 typedef struct 
@@ -49,18 +51,27 @@ typedef struct
 
 #pragma pack(pop)
 
-enum ObjectType
+typedef struct 
 {
-    OBJ_ROOT = 0x8000,
-    OBJ_WORLD = 0x8100,
-    OBJ_ZONE = 0x3000,
-    OBJ_ZONE_RESOURCE = 0x3100,
-    OBJ_MATERIAL_PALETTE = 0x1110,
-    OBJ_MATERIAL_PALETTE_HEADER = 0x1111, // has data
-    OBJ_SURFACE_ARRAY = 0x1001,
-    OBJ_SURFACE = 0x1000, // data
+    uint16_t key;
+    void (*value)(FILE* file, ObjectHeader* header);
+    UT_hash_handle hh;
+} ObjTypeMap;
 
-};
+typedef void (*ObjProcessor)(FILE*, ObjectHeader*);
+
+// ObjTypeMap* typeHandlers = NULL;
+// Dictionary* dict = DICT_NEW(uint16_t, ObjectHeader);
+hash_item* dict_obj_type_to_processor = NULL;
+
+uint16_t OBJ_ROOT = 0x8000;
+uint16_t OBJ_WORLD = 0x8100;
+uint16_t OBJ_ZONE = 0x3000;
+uint16_t OBJ_ZONE_RESOURCE = 0x3100;
+uint16_t OBJ_MATERIAL_PALETTE = 0x1110;
+uint16_t OBJ_MATERIAL_PALETTE_HEADER = 0x1111; // has data
+uint16_t OBJ_SURFACE_ARRAY = 0x1001;
+uint16_t OBJ_SURFACE = 0x1000; // data
 
 const uint8_t ESF_HEADER_MAP[5] = { sizeof(int32_t), sizeof(int32_t), sizeof(int32_t), sizeof(int64_t), sizeof(int64_t) };
 const uint8_t OBJECT_HEADER_MAP[4] = { sizeof(uint16_t), sizeof(int16_t), sizeof(int32_t), sizeof(int64_t) };
@@ -70,6 +81,26 @@ const uint8_t SURFACE_HEADER_MAP[5] = { sizeof(int32_t), sizeof(int32_t), sizeof
 void _process_standard(FILE* file, ObjectHeader* header) { /* create a dir, call _parse_object_header for the next header if there are still children */ }
 void _process_material_palette_header(FILE* file, ObjectHeader* header) {}
 void _process_surface(FILE* file, ObjectHeader* header) { }
+
+
+
+// dict->Add(dict, NULL, NULL);
+
+// void add_item(ObjTypeMap** dict, uint16_t key, void (*value)(FILE*, ObjectHeader*))
+// {
+//     ObjTypeMap* s;
+
+//     HASH_FIND_INT(*dict, &key, s);
+//     if (s == NULL)
+//     {
+//         s = (ObjTypeMap*)malloc(sizeof(ObjTypeMap));
+//         s->key = key;
+//         HASH_ADD_INT(*dict, key, s);
+//     }
+//     // Add the key if it doesnt exist, if it does just modify its value
+//     s->value = value;
+
+// }
 
 // build a handler struct to associate a value with a function pointer
 static const struct
@@ -89,16 +120,19 @@ static const struct
 // perform the dispatch lookup
 void _dispatch_handler(FILE* file, ObjectHeader* objHeader)
 {
-    for (size_t i = 0; i < OBJ_HANDLER_COUNT; i++)
-    {
-        // find the handler with the matching value
-        if (handlers[i].type == objHeader->type)
-        {
-            // call the appropriate function based on the type
-            handlers[i].handler(file, objHeader);
-            return;
-        }
-    }
+    // ObjProcessor f = (ObjProcessor)DICT_GET_ITEM(dict->dict, objHeader->type);
+    // f(file, objHeader);
+
+    // for (size_t i = 0; i < OBJ_HANDLER_COUNT; i++)
+    // {
+    //     // find the handler with the matching value
+    //     if (handlers[i].type == objHeader->type)
+    //     {
+    //         // call the appropriate function based on the type
+    //         handlers[i].handler(file, objHeader);
+    //         return;
+    //     }
+    // }
 }
 
 void _parse_object_header(FILE* file, long offset)
@@ -109,29 +143,34 @@ void _parse_object_header(FILE* file, long offset)
     sread_bytes(file, h);
     REVERSE_STRUCT_BYTES(h, OBJECT_HEADER_MAP);
 
-    _dispatch_handler(file, &h);
+    // _dispatch_handler(file, &h);
+    // ObjProcessor f = ((ObjProcessor)DICT_GET_ITEM(dict_obj_type_to_processor, h.type))(file, &h);
+    // f(file, &h);
+
+    // Run the processor function for the object type
+    ((ObjProcessor)DICT_GET_ITEM(dict_obj_type_to_processor, h.type))(file, &h);
     
 
-    h.type;
-    // TODO: if type is "directory like"
-    if (h.type == 0x0000)
-    {
-        // TODO:
-        CREATE_DIR("name based on h.type");
-        CHANGE_CWD("name based on h.type");
-        for (int32_t i = 0; i < h.childCount; i++)
-        {
+    // h.type;
+    // // TODO: if type is "directory like"
+    // if (h.type == 0x0000)
+    // {
+    //     // TODO:
+    //     CREATE_DIR("name based on h.type");
+    //     CHANGE_CWD("name based on h.type");
+    //     for (int32_t i = 0; i < h.childCount; i++)
+    //     {
 
-            _parse_object_header(file, offset + sizeof(h));
-        }
-    }
-    else if (h.type == OBJ_MATERIAL_PALETTE_HEADER)
-    {
-        // else type is "file like"
-        h.type;
-        //use appropriate parser for the type
+    //         _parse_object_header(file, offset + sizeof(h));
+    //     }
+    // }
+    // else if (h.type == OBJ_MATERIAL_PALETTE_HEADER)
+    // {
+    //     // else type is "file like"
+    //     h.type;
+    //     //use appropriate parser for the type
 
-    }
+    // }
 
     // return up on directory
     // TODO: if check
@@ -139,8 +178,22 @@ void _parse_object_header(FILE* file, long offset)
     
 }
 
-void mock(FILE* file)
+void parse(FILE* file)
 {
+    
+    // dict->Add(dict, (void*)&OBJ_ROOT, _process_standard);
+    // dict->Add(dict, (void*)&OBJ_MATERIAL_PALETTE_HEADER, _process_material_palette_header);
+    // dict->Add(dict, (void*)&OBJ_SURFACE, _process_surface);
+
+
+    // Setup dispatcher dictionary to link object type with appropriate processor function
+    DICT_ADD_ITEM(dict_obj_type_to_processor, OBJ_ROOT, _process_standard);
+    DICT_ADD_ITEM(dict_obj_type_to_processor, OBJ_MATERIAL_PALETTE_HEADER, _process_material_palette_header);
+    DICT_ADD_ITEM(dict_obj_type_to_processor, OBJ_SURFACE, _process_surface);
+
+    // void (*myfunc)(FILE*, ObjectHeader*) = (void (*)(FILE*, ObjectHeader*))DICT_GET_ITEM(dict->dict, OBJ_ROOT);
+    // myfunc(f, o);
+
     ESFHeader h;
     sread_bytes(file, h);
     REVERSE_STRUCT_BYTES(h, ESF_HEADER_MAP);
@@ -148,7 +201,8 @@ void mock(FILE* file)
 
     if (h.magic != ESF_MAGIC)
     {
-        // invalid magic
+        // TODO: invalid magic
+        return;
     }
 
     // store cwd
@@ -171,4 +225,5 @@ void mock(FILE* file)
     }
     
 
+    DICT_FREE(*dict_obj_type_to_processor);
 }

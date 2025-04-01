@@ -225,5 +225,5 @@ void parse(FILE* file)
     }
     
 
-    DICT_FREE(*dict_obj_type_to_processor);
+    DICT_FREE(dict_obj_type_to_processor);
 }

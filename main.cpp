@@ -21,31 +21,46 @@ int main()
     // char* value = "my value";
     uint32_t value = 12345;
 
-    hash_item* test = (hash_item*)malloc(sizeof(hash_item));
-    test->key = &key;
-    test->value = &value;
+    ///// hash_item* test = (hash_item*)malloc(sizeof(hash_item));
+    ///// test->key = &key;
+    ///// test->value = &value;
 
     // DICT_ADD_ITEM(dict, key, value);
     // HASH_ADD_INT(dict, key, test);
     // HASH_ADD(hh, dict, key, sizeof(key), test);
-    HASH_ADD_KEYPTR(hh, dict, &key, sizeof(key), test);
+    /////HASH_ADD_KEYPTR(hh, dict, &key, sizeof(key), test);
 
     // struct test_hash* item = (struct test_hash*)DICT_GET_ITEM(dict, key);
-    hash_item* item = NULL;
+    /////hash_item* item = NULL;
     // HASH_FIND_INT(dict, &key, item);
-    HASH_FIND(hh, dict, &key, sizeof(key), item);
+    /////HASH_FIND(hh, dict, &key, sizeof(key), item);
     // HASH_FIND_PTR(dict, &key, item);
     // HASH_FIND(hh, dict, &key, sizeof(key), item);
 
-    hash_item* cur = NULL;
-    hash_item* tmp = NULL;
+    DICT_ADD_ITEM(dict, key, value);
 
-    HASH_ITER(hh, dict, cur, tmp)
+
+    DICT_FOR_EACH(dict, entry)
     {
-        if(cur)
-            printf("%u\n", *((uint32_t*)(cur->value)));
+        if (entry)
+        {
+            printf("%u\n", *((uint32_t*)(entry->value)));
+        }
     }
-printf("ok 1");
+
+    printf("get item\n");
+    hash_item* item = (hash_item*)DICT_GET_ITEM(dict, key);
+    printf("g0t item\n");
+
+//     hash_item* cur = NULL;
+//     hash_item* tmp = NULL;
+
+//     HASH_ITER(hh, dict, cur, tmp)
+//     {
+//         if(cur)
+//             printf("%u\n", *((uint32_t*)(cur->value)));
+//     }
+// printf("ok 1");
     if (!item)
     {
         printf("fail\n");
@@ -55,6 +70,8 @@ printf("ok 1");
         printf("ok");
         printf("%u\n", *((uint32_t*)(item->value)));
     }
+
+    DICT_FREE(dict);
 
     return 0;
 

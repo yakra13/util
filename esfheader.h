@@ -187,9 +187,9 @@ void parse(FILE* file)
 
 
     // Setup dispatcher dictionary to link object type with appropriate processor function
-    DICT_ADD_ITEM(dict_obj_type_to_processor, OBJ_ROOT, _process_standard);
-    DICT_ADD_ITEM(dict_obj_type_to_processor, OBJ_MATERIAL_PALETTE_HEADER, _process_material_palette_header);
-    DICT_ADD_ITEM(dict_obj_type_to_processor, OBJ_SURFACE, _process_surface);
+    // DICT_ADD_ITEM(dict_obj_type_to_processor, OBJ_ROOT, _process_standard);
+    // DICT_ADD_ITEM(dict_obj_type_to_processor, OBJ_MATERIAL_PALETTE_HEADER, _process_material_palette_header);
+    // DICT_ADD_ITEM(dict_obj_type_to_processor, OBJ_SURFACE, _process_surface);
 
     // void (*myfunc)(FILE*, ObjectHeader*) = (void (*)(FILE*, ObjectHeader*))DICT_GET_ITEM(dict->dict, OBJ_ROOT);
     // myfunc(f, o);

@@ -5,8 +5,59 @@
 #include "esfheader.h"
 
 
+// typedef struct
+// {
+//     void* key;//uint16_t key;
+//     void* value;
+//     UT_hash_handle hh;
+// } uint16_void_dict;
+
 int main()
 {
+
+    hash_item* dict = NULL;
+
+    uint16_t key = 123;
+    // char* value = "my value";
+    uint32_t value = 12345;
+
+    hash_item* test = (hash_item*)malloc(sizeof(hash_item));
+    test->key = &key;
+    test->value = &value;
+
+    // DICT_ADD_ITEM(dict, key, value);
+    // HASH_ADD_INT(dict, key, test);
+    // HASH_ADD(hh, dict, key, sizeof(key), test);
+    HASH_ADD_KEYPTR(hh, dict, &key, sizeof(key), test);
+
+    // struct test_hash* item = (struct test_hash*)DICT_GET_ITEM(dict, key);
+    hash_item* item = NULL;
+    // HASH_FIND_INT(dict, &key, item);
+    HASH_FIND(hh, dict, &key, sizeof(key), item);
+    // HASH_FIND_PTR(dict, &key, item);
+    // HASH_FIND(hh, dict, &key, sizeof(key), item);
+
+    hash_item* cur = NULL;
+    hash_item* tmp = NULL;
+
+    HASH_ITER(hh, dict, cur, tmp)
+    {
+        if(cur)
+            printf("%u\n", *((uint32_t*)(cur->value)));
+    }
+printf("ok 1");
+    if (!item)
+    {
+        printf("fail\n");
+    }
+    else
+    {
+        printf("ok");
+        printf("%u\n", *((uint32_t*)(item->value)));
+    }
+
+    return 0;
+
     const char* expected_cwd = "/home/nemo/src/util";
     bool islittle = is_little_endian();
 

@@ -13,6 +13,13 @@ typedef struct
     UT_hash_handle hh;
 } hash_item;
 
+typedef struct
+{
+    void* key;//uint16_t key;
+    void* value;
+    UT_hash_handle hh;
+} uint16_void_dict;
+
 // typedef struct _dictionary
 // {
 //     size_t key_size;
@@ -63,19 +70,21 @@ static void _add_item(hash_item** dict, void* key, void* value, size_t keySize, 
         // TODO: malloc error check
         new_item = (hash_item*)malloc(sizeof(hash_item));
         
-        new_item->key = malloc(keySize);
-        new_item->value = malloc(valueSize);
+        // new_item->key = malloc(keySize);
+        // new_item->value = malloc(valueSize);
+        new_item->key = key;
 
-        HASH_ADD(hh, *dict, key, keySize, new_item);
-        memcpy(new_item->key, key, keySize);
+        // HASH_ADD(hh, *dict, key, keySize, new_item);
+        HASH_ADD_KEYPTR(hh, *dict, key, keySize, new_item);
+        // memcpy(new_item->key, key, keySize);
     }
-
-    memcpy(new_item->value, value, valueSize);
+    new_item->value = value;
+    // memcpy(new_item->value, value, valueSize);
 }
 
 static void* _find_item(hash_item* dict, void* key, size_t keySize)
 {
-    hash_item* item;
+    hash_item* item = NULL;
     HASH_FIND(hh, dict, key, keySize, item);
     return item ? item->value : NULL;
 }

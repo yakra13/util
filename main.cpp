@@ -4,74 +4,46 @@
 #include "file.h"
 #include "esfheader.h"
 
+void _dict_example()
+{
+    Dictionary* d = DICT_NEW_DICT(uint32_t, char*);
+    uint32_t keys[] = { 45, 22, 11, 145, 56, 31, 567, 2, 1001, 87 };
+    const char* values[] = { "apple", "banana", "cherry", "dragonfruit", "elephant",
+                            "falcon", "giraffe", "horizon", "island", "jungle" };
+    const char* replace_value = "REPLACED";
 
-// typedef struct
-// {
-//     void* key;//uint16_t key;
-//     void* value;
-//     UT_hash_handle hh;
-// } uint16_void_dict;
+    for (size_t i = 0; i < 10; i++)
+    {
+        DICT_ADD_ENTRY(d, keys[i], values[10 - 1 - i]);
+    }
+
+    DICT_DEL_ENTRY(d, keys[0]);
+
+    DICT_SET_VALUE(d, keys[1], replace_value);
+    
+    {DICT_FOR_EACH(d, entry){
+        if (entry)
+        {
+            printf("%u : %s\n", *(uint32_t*)entry->key, *(char**)(entry->value));
+        }
+    }}
+
+    {DICT_FOR_EACH(d, e){
+        if (e)
+        {
+            printf("%u : %s\n", *(uint32_t*)e->key, *(char**)(e->value));
+        }
+    }}
+
+    printf("dictionary items: %zu\n", d->count);
+
+    DICT_FREE(d);
+}
 
 int main()
 {
 
-    hash_item* dict = NULL;
-
-    uint16_t key = 123;
-    // char* value = "my value";
-    uint32_t value = 12345;
-
-    ///// hash_item* test = (hash_item*)malloc(sizeof(hash_item));
-    ///// test->key = &key;
-    ///// test->value = &value;
-
-    // DICT_ADD_ITEM(dict, key, value);
-    // HASH_ADD_INT(dict, key, test);
-    // HASH_ADD(hh, dict, key, sizeof(key), test);
-    /////HASH_ADD_KEYPTR(hh, dict, &key, sizeof(key), test);
-
-    // struct test_hash* item = (struct test_hash*)DICT_GET_ITEM(dict, key);
-    /////hash_item* item = NULL;
-    // HASH_FIND_INT(dict, &key, item);
-    /////HASH_FIND(hh, dict, &key, sizeof(key), item);
-    // HASH_FIND_PTR(dict, &key, item);
-    // HASH_FIND(hh, dict, &key, sizeof(key), item);
-
-    DICT_ADD_ITEM(dict, key, value);
-
-
-    DICT_FOR_EACH(dict, entry)
-    {
-        if (entry)
-        {
-            printf("%u\n", *((uint32_t*)(entry->value)));
-        }
-    }
-
-    printf("get item\n");
-    hash_item* item = (hash_item*)DICT_GET_ITEM(dict, key);
-    printf("g0t item\n");
-
-//     hash_item* cur = NULL;
-//     hash_item* tmp = NULL;
-
-//     HASH_ITER(hh, dict, cur, tmp)
-//     {
-//         if(cur)
-//             printf("%u\n", *((uint32_t*)(cur->value)));
-//     }
-// printf("ok 1");
-    if (!item)
-    {
-        printf("fail\n");
-    }
-    else
-    {
-        printf("ok");
-        printf("%u\n", *((uint32_t*)(item->value)));
-    }
-
-    DICT_FREE(dict);
+    _dict_example();
 
     return 0;
 

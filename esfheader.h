@@ -62,7 +62,7 @@ typedef void (*ObjProcessor)(FILE*, ObjectHeader*);
 
 // ObjTypeMap* typeHandlers = NULL;
 // Dictionary* dict = DICT_NEW(uint16_t, ObjectHeader);
-hash_item* dict_obj_type_to_processor = NULL;
+dict_entry* dict_obj_type_to_processor = NULL;
 
 uint16_t OBJ_ROOT = 0x8000;
 uint16_t OBJ_WORLD = 0x8100;
@@ -148,7 +148,7 @@ void _parse_object_header(FILE* file, long offset)
     // f(file, &h);
 
     // Run the processor function for the object type
-    ((ObjProcessor)DICT_GET_ITEM(dict_obj_type_to_processor, h.type))(file, &h);
+    ///////((ObjProcessor)DICT_GET_ENTRY(dict_obj_type_to_processor, h.type))(file, &h);
     
 
     // h.type;
@@ -225,5 +225,5 @@ void parse(FILE* file)
     }
     
 
-    DICT_FREE(dict_obj_type_to_processor);
+    // DICT_FREE(dict_obj_type_to_processor);
 }

@@ -1,34 +1,38 @@
 #ifndef ZBYTES
 #define ZBYTES
 
-#include <cstdint>
-#include <type_traits>
-#include <cstring>
-#include <algorithm>
+// #include <cstdint>
+// #include <type_traits>
+// #include <cstring>
+// #include <algorithm>
 
-template <typename T>
-inline T reverse_endian(T value)
-{
-    char bytes[sizeof(T)];
-
-    memcpy(bytes, &value, sizeof(T));
-
-    std::reverse(std::begin(bytes), std::end(bytes));
-
-    T reversed;
-    memcpy(&reversed, bytes, sizeof(T));
-
-    return reversed;
-}
-
-inline bool is_little_endian()
-{
-    uint16_t x = 1;
-    return *reinterpret_cast<uint8_t*>(&x) == 1;
-}
-
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
+
+// template <typename T>
+// inline T reverse_endian(T value)
+// {
+//     char bytes[sizeof(T)];
+
+//     memcpy(bytes, &value, sizeof(T));
+
+//     std::reverse(std::begin(bytes), std::end(bytes));
+
+//     T reversed;
+//     memcpy(&reversed, bytes, sizeof(T));
+
+//     return reversed;
+// }
+
+// inline bool is_little_endian()
+// {
+//     uint16_t x = 1;
+//     return *reinterpret_cast<uint8_t*>(&x) == 1;
+// }
+
+
 inline bool is_le_c()
 {
     uint16_t x = 1;
@@ -37,30 +41,30 @@ inline bool is_le_c()
     return (*r == 1);
 }
 
-template <typename T>
-static bool is_valid_flag_position(uint16_t position)
-{
-    std::size_t s = sizeof(T) * 8;
+// template <typename T>
+// static bool is_valid_flag_position(uint16_t position)
+// {
+//     std::size_t s = sizeof(T) * 8;
 
-    // Validate position is between 0 and bit count of T
-    if (s <= position || position < 0)
-        return false;
+//     // Validate position is between 0 and bit count of T
+//     if (s <= position || position < 0)
+//         return false;
     
-    return true;
-}
+//     return true;
+// }
 
-/// @brief Set a bit flag on
-/// @tparam T Integer types only
-/// @param flags The bit flags to operate on
-/// @param position 0-indexed bit position to turn on
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-inline void set_flag(T& flags, uint16_t position)
-{
-    if (!is_valid_flag_position<T>(position))
-        return;
+// /// @brief Set a bit flag on
+// /// @tparam T Integer types only
+// /// @param flags The bit flags to operate on
+// /// @param position 0-indexed bit position to turn on
+// template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+// inline void set_flag(T& flags, uint16_t position)
+// {
+//     if (!is_valid_flag_position<T>(position))
+//         return;
 
-    flags |= (1 << position);
-}
+//     flags |= (1 << position);
+// }
 
 static void _set_flag(void* flags, size_t width, size_t position);
 #define sset_flag(flags, position) _set_flag(&(flags), sizeof(flags) * 8, position)
@@ -131,74 +135,88 @@ static void _print_binary(void* value, size_t size, unsigned char);
 static void _print_binary(void* value, size_t size, unsigned char end = ' ')
 {
     uintmax_t t = 0;
-    int32_t bits = size * 8;
-    char buffer[bits + 1] = {'\0'};
+    size_t bits = size * 8;
+    // char* buffer = (char*)calloc(bits + 1, sizeof(char));
+
+    // if (!buffer)
+    // {
+    //     // TODO:
+    //     return;
+    // }
+
     memcpy(&t, value, size);
-    for (int32_t i = 0; i < bits; i++)
+
+    for (size_t i = 0; i < bits; i++)
     {
-        buffer[i] = (t & (1U << bits - i - 1)) ? '1' : '0';
+        //buffer[i] =
+        //
+        putchar((t & (1ULL << (bits - i - 1))) ? '1' : '0');
     }
 
-    printf("%s", buffer);
+    // buffer[bits] = '\0';
+
+    // printf("%s", buffer);
     putchar(end);
+
+    // free(buffer);
 }
 
-void set_flag16(uint16_t flags, uint8_t flag)
-{
-    flag %= 16;
-    flags |= (1 << flag);
+// void set_flag16(uint16_t flags, uint8_t flag)
+// {
+//     flag %= 16;
+//     flags |= (1 << flag);
 
-    //rotate bits this rotates the bits left and takes the front bits that fall off onto the back of the value
-    // (x << pos) | (x >> (8 - pos))
-}
+//     //rotate bits this rotates the bits left and takes the front bits that fall off onto the back of the value
+//     // (x << pos) | (x >> (8 - pos))
+// }
 
-/// @brief Set a bit flag off
-/// @tparam T Integer types only
-/// @param flags The bit flags to operate on
-/// @param position 0-indexed bit position to turn off
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-inline void clear_flag(T& flags, uint16_t position)
-{
-    if (!is_valid_flag_position<T>(position))
-        return;
+// /// @brief Set a bit flag off
+// /// @tparam T Integer types only
+// /// @param flags The bit flags to operate on
+// /// @param position 0-indexed bit position to turn off
+// template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+// inline void clear_flag(T& flags, uint16_t position)
+// {
+//     if (!is_valid_flag_position<T>(position))
+//         return;
 
-    flags &= ~(1 << position);
-}
+//     flags &= ~(1 << position);
+// }
 
-/// @brief Toggle a bit flag
-/// @tparam T Integer types only
-/// @param flags The bit flags to operate on
-/// @param position 0-indexed bit position to toggle
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-inline void toggle_flag(T& flags, uint16_t position)
-{
-    if (!is_valid_flag_position<T>(position))
-        return;
+// /// @brief Toggle a bit flag
+// /// @tparam T Integer types only
+// /// @param flags The bit flags to operate on
+// /// @param position 0-indexed bit position to toggle
+// template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+// inline void toggle_flag(T& flags, uint16_t position)
+// {
+//     if (!is_valid_flag_position<T>(position))
+//         return;
 
-    flags &= ~(1 << position);
-}
+//     flags &= ~(1 << position);
+// }
 
-/// @brief Check if flag is set
-/// @tparam T Integer types only
-/// @param flags The bit flags to operate on
-/// @param position 0-indexed bit position to check
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-inline bool is_flag_set(T& flags, uint16_t position)
-{
-    if (!is_valid_flag_position<T>(position))
-        return false;
+// /// @brief Check if flag is set
+// /// @tparam T Integer types only
+// /// @param flags The bit flags to operate on
+// /// @param position 0-indexed bit position to check
+// template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+// inline bool is_flag_set(T& flags, uint16_t position)
+// {
+//     if (!is_valid_flag_position<T>(position))
+//         return false;
 
-    return flags & (1 << position) ? 1 : 0;
-}
+//     return flags & (1 << position) ? 1 : 0;
+// }
 
-/// @brief Check if flags match a mask
-/// @tparam T Integer types only
-/// @param flags The bit flags to operate on
-/// @param mask Mask to compare
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-inline bool are_flags_set(T& flags, T mask)
-{
-    return (flags & mask) == mask;
-}
+// /// @brief Check if flags match a mask
+// /// @tparam T Integer types only
+// /// @param flags The bit flags to operate on
+// /// @param mask Mask to compare
+// template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+// inline bool are_flags_set(T& flags, T mask)
+// {
+//     return (flags & mask) == mask;
+// }
 
 #endif

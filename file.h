@@ -186,39 +186,44 @@ typedef struct _fileinfo
 
 
 
-static FileInfo _get_file_info(const char* path)
+// static FileInfo _get_file_info(const char* path)
+#ifdef _WIN32
+static struct _stat _get_file_info(const char* path)
+#else
+static struct stat _get_file_info(const char* path)
+#endif
 {
-    FileInfo out;
+    FileInfo out = { 0 };
     //TODO: compare to windows types for conversion
     #ifdef _WIN32
-        struct _stat fi;
+        struct _stat fi = { 0 };
         _stat(path, &fi);
     #else
-        struct stat fi;
+        struct stat fi = { 0 };
         stat("test.txt", &fi);
         out.accessTime.nsec = fi.st_atim.tv_nsec;
         out.accessTime.sec = fi.st_atim.tv_sec;
     #endif
 
-    fi.st_atim; //struct timespec
-        fi.st_atim.tv_nsec; // long
-        fi.st_atim.tv_sec; //time_t -> long
-    fi.st_blksize; //blksize_t long
-    fi.st_blocks; //blkcnt_t long  
-    fi.st_ctim; //struct timespec
-        fi.st_ctim.tv_nsec; // long
-        fi.st_ctim.tv_sec; //time_t long
-    fi.st_dev; //dev_t unsigned long
-    fi.st_gid; //gid_t unsigned int
-    fi.st_ino; //ino_t unsigned long
-    fi.st_mode; //mode_t unsigned int
-    fi.st_mtim; //struct timespec
-        fi.st_mtim.tv_nsec; //long
-        fi.st_mtim.tv_sec; //time_t long
-    fi.st_nlink; //nlink_t unsigned long
-    fi.st_rdev; //dev_t unsigned long
-    fi.st_size; //off_t long
-    fi.st_uid; //uid_t unsigned int
+    // fi.st_atim; //struct timespec
+    //     fi.st_atim.tv_nsec; // long
+    //     fi.st_atim.tv_sec; //time_t -> long
+    // fi.st_blksize; //blksize_t long
+    // fi.st_blocks; //blkcnt_t long  
+    // fi.st_ctim; //struct timespec
+    //     fi.st_ctim.tv_nsec; // long
+    //     fi.st_ctim.tv_sec; //time_t long
+    // fi.st_dev; //dev_t unsigned long
+    // fi.st_gid; //gid_t unsigned int
+    // fi.st_ino; //ino_t unsigned long
+    // fi.st_mode; //mode_t unsigned int
+    // fi.st_mtim; //struct timespec
+    //     fi.st_mtim.tv_nsec; //long
+    //     fi.st_mtim.tv_sec; //time_t long
+    // fi.st_nlink; //nlink_t unsigned long
+    // fi.st_rdev; //dev_t unsigned long
+    // fi.st_size; //off_t long
+    // fi.st_uid; //uid_t unsigned int
 
     // st_atime
     //!st_blksize
@@ -234,7 +239,7 @@ static FileInfo _get_file_info(const char* path)
     // st_size
     // st_uid
 
-    return out;
+    return fi;
 }
 
 static bool _change_cwd(const char* path)
@@ -242,8 +247,9 @@ static bool _change_cwd(const char* path)
     int result = 0;
     #ifdef _WIN32
         result = _chdir(path);
-    #endif
+    #else
         result = chdir(path);
+    #endif
     
     if (result != 0)
     {
@@ -326,12 +332,12 @@ static int _mkdir_r(const char* path, unsigned int mode = 0)
 
 
 
-static void _reversebytes(void*, size_t);
+// static void _reverse_bytes(void*, size_t);
 /// @brief Reverse the byte order of the passed value
 /// @param value The variable to reverse
-#define sreversebytes(value) _reversebytes(&(value), sizeof(value))
+#define REVERSE_BYTES(value) _reverse_bytes(&(value), sizeof(value))
 
-static void _reversebytes(void* value, size_t length)
+static void _reverse_bytes(void* value, size_t length)
 {
 	if (value == NULL || length == 0)
 		return;
@@ -348,7 +354,7 @@ static void _reversebytes(void* value, size_t length)
 	}
 }
 
-static void _reverse_struct_bytes(void*, size_t, const uint8_t*, size_t);
+// static void _reverse_struct_bytes(void*, size_t, const uint8_t*, size_t);
 #define REVERSE_STRUCT_BYTES(structData, structMap) _reverse_struct_bytes(&(structData), sizeof(structData), structMap, sizeof(structMap))
 static void _reverse_struct_bytes(void* structData, size_t dataSize, const uint8_t* map, size_t mapSize)
 {
@@ -371,13 +377,13 @@ static void _reverse_struct_bytes(void* structData, size_t dataSize, const uint8
 
     for (int32_t i = 0; i < mapSize; i++)
     {
-        _reversebytes(structData + offset, map[i]);
+        _reverse_bytes((uint8_t*)structData + offset, map[i]);
         offset += map[i];
     }
     
 }
 
-static void _read_bytes(FILE*, void*, size_t);
+// static void _read_bytes(FILE*, void*, size_t);
 #define sread_bytes(filePtr, dest) _read_bytes(filePtr, &(dest), sizeof(dest))
 static void _read_bytes(FILE* file, void* dest, size_t size)
 {
@@ -391,7 +397,7 @@ static void _read_bytes(FILE* file, void* dest, size_t size)
 	// error check bytesRead: feof; ferror
 }
 
-static void _read_le(FILE*, void*, size_t);
+// static void _read_le(FILE*, void*, size_t);
 /// @brief test
 /// @param file 
 /// @param dest 
@@ -400,11 +406,11 @@ static void _read_le(FILE* file, void* dest, size_t size)
 {
     _read_bytes(file, dest, size);
 
-	_reversebytes(dest, size);
+	_reverse_bytes(dest, size);
 }
 
 
-void _print_as_byte_string(void*, size_t, unsigned char);
+// void _print_as_byte_string(void*, size_t, unsigned char);
 #define PRINT_VALUE_STRING(value, ...) _print_as_byte_string(&(value), sizeof(value), ##__VA_ARGS__)
 void _print_as_byte_string(void* value, size_t size, unsigned char end = ' ')
 {

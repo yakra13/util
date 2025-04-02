@@ -7,8 +7,9 @@
 
 int main()
 {
+#ifdef DEBUG
     const char* expected_cwd = "/home/nemo/src/util";
-    bool islittle = is_little_endian();
+    bool islittle = is_le_c();
 
     char cwd[256] = { 0 };
 
@@ -17,22 +18,21 @@ int main()
         printf("CWD: %s\n", cwd);
         if (strcmp(cwd, expected_cwd) == 0)
         {
-            FileInfo fileInfo = GET_FILE_INFO("test.txt");
-            
+            //FileInfo fileInfo = GET_FILE_INFO("test.txt");
+            //TODO
         }
     }
 
     // TODO: check acceptable windows formats for paths
-    if(CREATE_DIR_R("../tempdir/newdir") != 0)
+    if(CREATE_DIR_R("../tempdir /newdir") != 0)
     {
         //TODO: can handle error codes...
         printf("fail sauce\n");
     }
 
-
     uint32_t reverse = 0xEFBEADDE;
     printf("reverse %X\n", reverse);
-    sreversebytes(reverse);
+    REVERSE_BYTES(reverse);
     printf("reverse %X\n", reverse);
 
     FILE* f = fopen("test.txt", "rb");
@@ -42,15 +42,15 @@ int main()
 
 
     PRINT_VALUE_STRING(outHeader.magic);
-    sreversebytes(outHeader.magic);
+    REVERSE_BYTES(outHeader.magic);
     PRINT_VALUE_STRING(outHeader.magic);
 
     PRINT_VALUE_STRING(outHeader.objectCount);
-    sreversebytes(outHeader.objectCount);
+    REVERSE_BYTES(outHeader.objectCount);
     PRINT_VALUE_STRING(outHeader.objectCount);
 
     PRINT_VALUE_STRING(outHeader.unknown1, '\0');
-    sreversebytes(outHeader.unknown1);
+    REVERSE_BYTES(outHeader.unknown1);
     PRINT_VALUE_STRING(outHeader.unknown1);
     
     PRINT_VALUE_STRING(outHeader, '\n');
@@ -76,6 +76,18 @@ int main()
     printf("rot %u\n", rotate);
 
     printf("\n");
+#else
+    FILE* tunaria;
+    tunaria = fopen("C:\\Users\\goku1\\source\\TUNARIA.ESF", "rb");
+    if (!tunaria)
+    {
+
+    }
+
+    parse(tunaria);
+
+    fclose(tunaria);
+#endif
 
     return EXIT_SUCCESS;
 }

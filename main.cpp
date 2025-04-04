@@ -2,7 +2,8 @@
 
 #include "bytes.h"
 #include "file.h"
-#include "esfheader.h"
+// #include "esfheader.h"
+#include "dictionary.h"
 
 void _dict_example()
 {
@@ -28,94 +29,101 @@ void _dict_example()
         }
     }}
 
-    {DICT_FOR_EACH(d, e){
+    dict_entry* e = NULL;
+    dict_entry* t = NULL;
+
+    DICT_ITER(d, e, t)
+    {
         if (e)
         {
             printf("%u : %s\n", *(uint32_t*)e->key, *(char**)(e->value));
         }
-    }}
+    }
 
     printf("dictionary items: %zu\n", d->count);
 
     DICT_FREE(d);
 }
 
+// int my_global = 1;
+
 int main()
 {
-
     _dict_example();
+
+    testafunc();
 
     return 0;
 
-    const char* expected_cwd = "/home/nemo/src/util";
-    bool islittle = is_little_endian();
+    // const char* expected_cwd = "/home/nemo/src/util";
+    // bool islittle = is_little_endian();
 
-    char cwd[256] = { 0 };
+    // char cwd[256] = { 0 };
 
-    if (GET_CURRENT_DIR(cwd) != NULL)
-    {
-        printf("CWD: %s\n", cwd);
-        if (strcmp(cwd, expected_cwd) == 0)
-        {
-            FileInfo fileInfo = GET_FILE_INFO("test.txt");
+    // if (GET_CURRENT_DIR(cwd) != NULL)
+    // {
+    //     printf("CWD: %s\n", cwd);
+    //     if (strcmp(cwd, expected_cwd) == 0)
+    //     {
+    //         FileInfo fileInfo = GET_FILE_INFO("test.txt");
             
-        }
-    }
+    //     }
+    // }
 
-    // TODO: check acceptable windows formats for paths
-    if(CREATE_DIR_R("../tempdir/newdir") != 0)
-    {
-        //TODO: can handle error codes...
-        printf("fail sauce\n");
-    }
-
-
-    uint32_t reverse = 0xEFBEADDE;
-    printf("reverse %X\n", reverse);
-    sreversebytes(reverse);
-    printf("reverse %X\n", reverse);
-
-    FILE* f = fopen("test.txt", "rb");
-
-    ESFHeader outHeader = {0};
-    sread_bytes(f, outHeader);
+    // // TODO: check acceptable windows formats for paths
+    // if(CREATE_DIR_R("../tempdir/newdir") != 0)
+    // {
+    //     //TODO: can handle error codes...
+    //     printf("fail sauce\n");
+    // }
 
 
-    PRINT_VALUE_STRING(outHeader.magic);
-    sreversebytes(outHeader.magic);
-    PRINT_VALUE_STRING(outHeader.magic);
+    // uint32_t reverse = 0xEFBEADDE;
+    // printf("reverse %X\n", reverse);
+    // sreversebytes(reverse);
+    // printf("reverse %X\n", reverse);
 
-    PRINT_VALUE_STRING(outHeader.objectCount);
-    sreversebytes(outHeader.objectCount);
-    PRINT_VALUE_STRING(outHeader.objectCount);
+    // FILE* f = fopen("test.txt", "rb");
 
-    PRINT_VALUE_STRING(outHeader.unknown1, '\0');
-    sreversebytes(outHeader.unknown1);
-    PRINT_VALUE_STRING(outHeader.unknown1);
+    // ESFHeader outHeader = {0};
+    // sread_bytes(f, outHeader);
+
+
+    // PRINT_VALUE_STRING(outHeader.magic);
+    // sreversebytes(outHeader.magic);
+    // PRINT_VALUE_STRING(outHeader.magic);
+
+    // PRINT_VALUE_STRING(outHeader.objectCount);
+    // sreversebytes(outHeader.objectCount);
+    // PRINT_VALUE_STRING(outHeader.objectCount);
+
+    // PRINT_VALUE_STRING(outHeader.unknown1, '\0');
+    // sreversebytes(outHeader.unknown1);
+    // PRINT_VALUE_STRING(outHeader.unknown1);
     
-    PRINT_VALUE_STRING(outHeader, '\n');
+    // PRINT_VALUE_STRING(outHeader, '\n');
 
-    fclose(f);
+    // fclose(f);
 
-    uint8_t flags = 0;
-    printf("flags \n");
+    // uint8_t flags = 0;
+    // printf("flags \n");
 
-    PRINT_BINARY_STRING(flags, '\n');
-    sset_flag(flags, 5);
-    PRINT_BINARY_STRING(flags, '\n');
-    stoggle_flag(flags, 5);
-    PRINT_BINARY_STRING(flags, '\n');
-    stoggle_flag(flags, 5);
-    PRINT_BINARY_STRING(flags, '\n');
+    // PRINT_BINARY_STRING(flags, '\n');
+    // sset_flag(flags, 5);
+    // PRINT_BINARY_STRING(flags, '\n');
+    // stoggle_flag(flags, 5);
+    // PRINT_BINARY_STRING(flags, '\n');
+    // stoggle_flag(flags, 5);
+    // PRINT_BINARY_STRING(flags, '\n');
 
-    uint16_t rotate = 1;
-    printf("rot %u\n", rotate);
-    srot_left(rotate, 1);
-    printf("rot %u\n", rotate);
-    srot_right(rotate, 2);
-    printf("rot %u\n", rotate);
+    // uint16_t rotate = 1;
+    // printf("rot %u\n", rotate);
+    // srot_left(rotate, 1);
+    // printf("rot %u\n", rotate);
+    // srot_right(rotate, 2);
+    // printf("rot %u\n", rotate);
 
-    printf("\n");
+    // printf("\n");
 
     return EXIT_SUCCESS;
 }

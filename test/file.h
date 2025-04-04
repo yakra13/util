@@ -466,3 +466,40 @@ surface arr |01 10|00 00|d3 0c 03 00|03 00 00 00|
 
 
 */
+
+#include <math.h>
+
+double calculate_entropy(const char* filepath)
+{
+    FILE* f = fopen(filepath, "rb");
+    if (!f)
+    {
+        //TODO
+        return -1.0;
+    }
+
+    unsigned long long b_counts[256] = { 0 };
+    unsigned char b;
+    unsigned long long total_bytes = 0;
+
+    while (fread(&b, 1, 1, f) == 1)
+    {
+        b_counts[b]++;
+        total_bytes++;
+    }
+
+    fclose(f);
+
+    double e = 0.0;
+
+    for (int i = 0; i < 256; i++)
+    {
+        if (b_counts[i] > 0)
+        {
+            double p = (double)b_counts[i] / total_bytes;
+            e -= p * log2(p);
+        }
+    }
+
+    return e;    
+}

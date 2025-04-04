@@ -92,6 +92,7 @@ static void _free_dict(Dictionary* dict);
     dict_entry* __entry_tmp = NULL; \
     HASH_ITER(hh, dict->head, entryLabel, __entry_tmp)
 
+#define DICT_ITER(dict, entry, tmp) HASH_ITER(hh, dict->head, entry, tmp)
 
 static Dictionary* _new_dictionary(size_t keySize, size_t valueSize)
 {

@@ -8,6 +8,7 @@
                 "-fdiagnostics-color=always",
                 "-g3",
                 "${file}",
+                "${fileDirname}/testa.cpp",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
@@ -31,6 +32,7 @@
                 "-fdiagnostics-color=always",
                 "-g3",
                 "${file}",
+                "${fileDirname}/testa.cpp",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],

@@ -14,19 +14,20 @@ void dict_example()
     Dictionary* d = DICT_NEW_DICT(uint16_t, char*);
 
     uint16_t key = 1;
-    uint16_t key2 = 2;
     char* value = "something here";
     char* value2 = "another thing";
     char* value3 = "i dunno";
-    
+
     DICT_ADD_ENTRY(d, key, value)
-    DICT_ADD_ENTRY(d, key2, value2)
+    key = 2;
+    DICT_ADD_ENTRY(d, key, value2)
 
     BEGIN_DICT_ITER(d, entry)
         printf("key: %hu, value: %s\n", *(uint16_t*)(entry->key), *(const char**)entry->value);
     END_DICT_ITER()
 
-    DICT_SET_VALUE(d, key2, value3)
+    key = 1;
+    DICT_SET_VALUE(d, key, value3)
 
     BEGIN_DICT_ITER(d, entry)
         printf("key: %hu, value: %s\n", *(uint16_t*)(entry->key), *(const char**)entry->value);
@@ -37,11 +38,12 @@ void dict_example()
 
 void entropy_example()
 {
-    
+
 }
 
 int main(int argc, char** argv)
 {
+    dict_example();
     
     return 0;
 }

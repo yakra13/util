@@ -46,6 +46,8 @@ Function Declarations:
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdbool.h>
+#include <math.h>
 
 typedef struct
 {
@@ -157,9 +159,9 @@ typedef struct _fileinfo
     #define CREATE_DIR_R(...) __GET_MACRO(__VA_ARGS__, __CREATE_DIR_R_BOTH, __CREATE_DIR_R_PATH)(__VA_ARGS__)
 
 
-    #define CHANGE_CWD(path) _change_cwd(path)
-    #define GET_CURRENT_DIR(buffer) getcwd(buffer, sizeof(buffer))
-    #define GET_FILE_INFO(path) _get_file_info(path)
+    #define CHANGE_CWD(path) _change_cwd(path);
+    #define GET_CURRENT_DIR(buffer) getcwd(buffer, sizeof(buffer));
+    #define GET_FILE_INFO(path) _get_file_info(path);
 
     typedef struct stat _FileStat;
 #endif
@@ -255,7 +257,7 @@ static bool _change_cwd(const char* path)
     return true;
 }
 
-static int _mkdir_r(const char* path, unsigned int mode = 0)
+static int _mkdir_r(const char* path, unsigned int mode)
 {
     char buffer[MAX_PATH_LENGTH] = { 0 };
     char* p = buffer;
@@ -406,7 +408,7 @@ static void _read_le(FILE* file, void* dest, size_t size)
 
 void _print_as_byte_string(void*, size_t, unsigned char);
 #define PRINT_VALUE_STRING(value, ...) _print_as_byte_string(&(value), sizeof(value), ##__VA_ARGS__)
-void _print_as_byte_string(void* value, size_t size, unsigned char end = ' ')
+void _print_as_byte_string(void* value, size_t size, unsigned char end)
 {
     unsigned char* c = (unsigned char*)value;
 

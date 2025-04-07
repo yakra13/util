@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <wchar.h>
+#include <locale.h>
+
 #include "dictionary.h"
+#include "file.h"
 
 // typedef int KEY_TYPE;
 // typedef float VALUE_TYPE;
@@ -38,12 +42,54 @@ void dict_example()
 
 void entropy_example()
 {
+    double e = calculate_entropy("main");
+    printf("entropy of %.3f\n", e);
+}
 
+void directory_example()
+{
+    // TODO
+    // CREATE_DIR("")
+    // CREATE_DIR_R("")
+    // CHANGE_CWD("")
+
+    // char* buffer[MAX_PATH_LENGTH] = {0};
+    // GET_CURRENT_DIR(buffer)
+
+
+}
+
+void text_example()
+{
+    // TODO: dont mix wide and narrow strings i guess...
+    printf("set locale\n");
+    fflush(stdout);
+    setlocale(LC_ALL, "");
+
+    Text* wide = NEW_TEXT(L"this is wide カタカナ")
+    Text* narrow = NEW_TEXT("some more text");
+    // concat_text(wide, narrow);
+
+    wprintf(L"wide: %ls\n", (wchar_t*)wide->head);
+    fflush(stdout);
+
+    printf("narrow: %s\n", (char*)narrow->head);
+    fflush(stdout);
+    if (to_narrow(wide) != 0)
+    {
+        printf("it went wrong\n");
+    }
+
+    printf("narrow: %s\n", (char*)wide->head);
 }
 
 int main(int argc, char** argv)
 {
-    dict_example();
-    
+    text_example();
+
+    // dict_example();
+
+    // entropy_example();
+
     return 0;
 }

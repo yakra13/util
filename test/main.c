@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <wchar.h>
-#include <locale.h>
 
 #include "dictionary.h"
 #include "file.h"
+#include "bytes.h"
 
 // typedef int KEY_TYPE;
 // typedef float VALUE_TYPE;
@@ -59,33 +58,27 @@ void directory_example()
 
 }
 
-void text_example()
+void bytes_example()
 {
-    // TODO: dont mix wide and narrow strings i guess...
-    printf("set locale\n");
-    fflush(stdout);
-    setlocale(LC_ALL, "");
+    uint8_t flags = 0;
+    uint8_t mask = 0xF0;
+    
+    char bit_str_buffer[64] = { 0 };
 
-    Text* wide = NEW_TEXT(L"this is wide カタカナ")
-    Text* narrow = NEW_TEXT("some more text");
-    // concat_text(wide, narrow);
+    SET_BIT_FLAG(flags, 0)
 
-    wprintf(L"wide: %ls\n", (wchar_t*)wide->head);
-    fflush(stdout);
+    SET_BIT_FLAG(flags, 2)
 
-    printf("narrow: %s\n", (char*)narrow->head);
-    fflush(stdout);
-    if (to_narrow(wide) != 0)
-    {
-        printf("it went wrong\n");
-    }
+    SET_BIT_FLAG(flags, 4)
 
-    printf("narrow: %s\n", (char*)wide->head);
+    GET_BIT_STRING(flags, bit_str_buffer);
+
+    printf("bits: %s\n", bit_str_buffer);
 }
 
 int main(int argc, char** argv)
 {
-    text_example();
+    bytes_example();
 
     // dict_example();
 

@@ -62,9 +62,9 @@ inline void set_flag(T& flags, uint16_t position)
     flags |= (1 << position);
 }
 
-static void _set_flag(void* flags, size_t width, size_t position);
+static void _set_bit_flag(void* flags, size_t width, size_t position);
 #define sset_flag(flags, position) _set_flag(&(flags), sizeof(flags) * 8, position)
-static void _set_flag(void* flags, size_t width, size_t position)
+static void _set_bit_flag(void* flags, size_t width, size_t position)
 {
     if (position >= width)
         return;
@@ -76,9 +76,9 @@ static void _set_flag(void* flags, size_t width, size_t position)
     memcpy(flags, &temp, width / 8);
 }
 
-static void _toggle_flag(void* flags, size_t width, size_t position);
+static void _toggle_bit_flag(void* flags, size_t width, size_t position);
 #define stoggle_flag(flags, position) _toggle_flag(&(flags), sizeof(flags) * 8, position)
-static void _toggle_flag(void* flags, size_t width, size_t position)
+static void _toggle_bit_flag(void* flags, size_t width, size_t position)
 {
     if (position >= width)
         return;
@@ -96,9 +96,9 @@ uint16_t rot_left16(uint16_t value, uint8_t shift)
     return (value << shift) | (value << (16 - shift));
 }
 
-static void _rot_left(void* value, size_t size, size_t shift);
+static void _rotate_bits_left(void* value, size_t size, size_t shift);
 #define srot_left(value, shift) _rot_left(&(value), sizeof(value), shift)
-static void _rot_left(void* value, size_t size, size_t shift)
+static void _rotate_bits_left(void* value, size_t size, size_t shift)
 {
     if (!value)
         return;
@@ -111,9 +111,9 @@ static void _rot_left(void* value, size_t size, size_t shift)
     memcpy(value, &t, size); 
 }
 
-static void _rot_right(void* value, size_t size, size_t shift);
+static void _rotate_bits_right(void* value, size_t size, size_t shift);
 #define srot_right(value, shift) _rot_right(&(value), sizeof(value), shift)
-static void _rot_right(void* value, size_t size, size_t shift)
+static void _rotate_bits_right(void* value, size_t size, size_t shift)
 {
     if (!value)
         return;
@@ -126,9 +126,9 @@ static void _rot_right(void* value, size_t size, size_t shift)
     memcpy(value, &t, size); 
 }
 
-static void _print_binary(void* value, size_t size, unsigned char);
+static void _print_bits(void* value, size_t size, unsigned char);
 #define PRINT_BINARY_STRING(value, ...) _print_binary(&(value), sizeof(value), ##__VA_ARGS__)
-static void _print_binary(void* value, size_t size, unsigned char end = ' ')
+static void _print_bits(void* value, size_t size, unsigned char end = ' ')
 {
     uintmax_t t = 0;
     int32_t bits = size * 8;

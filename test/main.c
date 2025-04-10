@@ -62,7 +62,7 @@ void bytes_example()
 {
     uint8_t flags = 0;
     uint8_t mask = 0xF0;
-    
+
     char bit_str_buffer[64] = { 0 };
 
     SET_BIT_FLAG(flags, 0)
@@ -79,6 +79,7 @@ void bytes_example()
 int main(int argc, char** argv)
 {
     bytes_example();
+    printf("\x64\n");
 
     // dict_example();
 

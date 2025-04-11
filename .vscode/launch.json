@@ -25,6 +25,14 @@
             ],
             "preLaunchTask": "C/C++: gcc-12 build active file",
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["test"]
         }
     ],
     "version": "2.0.0"

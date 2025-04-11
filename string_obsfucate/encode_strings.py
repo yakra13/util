@@ -43,7 +43,7 @@ class Encoder():
     def get_func_def(self) -> str:
         return self._func_def
 
-class BitRotLeft3(Encoder):
+class Rotate(Encoder):
     __ROT_STEPS: Final[int] = 3
     
     def __init__(self):
@@ -78,7 +78,7 @@ f'''{self._FUNC_SIGNATURE}
 
 
 class XOR(Encoder):
-    __XOR_VALUE: Final[int] = 0x5
+    __XOR_VALUE: Final[int] = 0xac
 
     def __init__(self):
         self._func_def = \
@@ -112,11 +112,7 @@ f'''{self._FUNC_SIGNATURE}
 
 
 class StringEncoder():
-    ''' StringEncoder
-    '''
-    _BUFFER_SIZE_DEFINE: Final[str]    = 'DECODE_BUFFER_SIZE'
-    _DECODE_STRING_PATTERN: Final[str] = 'DECODE'
-    _DECODE_SIGNATURE: Final[str]      = 'const char* decode_string(const char* text, size_t length)\n{\n'
+    ''' StringEncoder'''
     _DECODE_HEADER_NAME: Final[str]    = 'decodestring.h'
     _BACKUP_EXTENSION: Final[str]      = '.bak'
 
@@ -127,7 +123,6 @@ class StringEncoder():
     _header: Path           = None
 
     def __init__(self, root_directory: Path, files: list[Path], encoder: str) -> None:
-        '''Initialize StringEncoder'''
         for f in files:
             if f.name == self._DECODE_HEADER_NAME:
                 if self._header is not None:
@@ -153,7 +148,7 @@ class StringEncoder():
             if len(matches) < 1:
                 continue
             
-            # Backup the current file in place with .bak extension
+            # Backup the current file in place with extension
             shutil.copy(file.resolve(), str(file.resolve()) + self._BACKUP_EXTENSION)
 
             output: str = ""
@@ -181,6 +176,7 @@ class StringEncoder():
                 output += f'", {l}'
                 last = e + 1
             
+            # Append the remaining data
             output += data[last:]
             
             # Overwrite the original file
@@ -199,18 +195,21 @@ class StringEncoder():
             f.write(decoder_function_text)
 
 
-def validate_class_has_methods(class_name: str, class_methods: list[str]) -> bool:
+def validate_class_has_methods(base_class: Type, class_name: str, class_methods: list[str]) -> bool:
     cls_ref = globals()[class_name]
     cls_ins = cls_ref()
     report = []
 
     for method in class_methods:
-        if not hasattr(cls_ins, method):
+        base_method = base_class.__dict__.get(method)
+        derived_method = cls_ref.__dict__.get(method)
+        # if not hasattr(cls_ins, method):
+        if derived_method is None or base_method == derived_method:
             report.append(method)
 
     if len(report) > 0:
         # TODO: specify as debug message
-        print(f'Specified encoder [{class_name}] does not define required methods:\n' + ''.join(f'\t{m}' for m in report))
+        print(f'WARNING: class {class_name}({base_class.__name__}) does not implement required methods:\n' + ''.join(f' -> {m}\n' for m in report))
         return False
 
     return True
@@ -224,14 +223,13 @@ def get_derived_classes(cls: Type) -> list[str]:
     filtered_classes = [name for name in classes if issubclass(globals()[name], cls) and globals()[name] is not cls]
 
     for class_name in filtered_classes:
-        if validate_class_has_methods(class_name, methods):
+        if validate_class_has_methods(cls, class_name, methods):
             valid_classes.append(class_name)
 
     return valid_classes
 
 
 if __name__ == '__main__':
-
     arg_parser: argparse.ArgumentParser = argparse.ArgumentParser(description="TODO")
     
     arg_parser.add_argument("root", help="root dir help")

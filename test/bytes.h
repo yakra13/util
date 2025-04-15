@@ -163,14 +163,16 @@ void _binary_left_shift(void* value, size_t size, size_t shift)
     size_t shift_bytes = shift / 8;
     size_t shift_bits  = shift % 8;
     
+    unsigned char* b = NULL;
+    unsigned char c = 0;
     unsigned char c_store = 0;
 
     for (size_t _ = 0; _ < shift_bytes; _++)
     {
         for (size_t offset = 0; offset < size; offset++)
         {
-            unsigned char* b = ((unsigned char*)value) + offset;
-            unsigned char c = *b;
+            b = ((unsigned char*)value) + offset;
+            c = *b;
             *b = c_store;
             c_store = c;
         }
@@ -178,13 +180,13 @@ void _binary_left_shift(void* value, size_t size, size_t shift)
 
     c_store = 0;
 
-    if (!shift_bits)
+    if (shift_bits == 0)
         return;
 
     for (size_t offset = 0; offset < size; offset++)
     {
-        unsigned char* b = ((unsigned char*)value) + offset;
-        unsigned char c = *b;
+        b = ((unsigned char*)value) + offset;
+        c = *b;
         c >>= 8 - shift_bits;
         *b <<= shift_bits;
         *b += c_store;
@@ -192,20 +194,21 @@ void _binary_left_shift(void* value, size_t size, size_t shift)
     }
 }
 
-
 void _binary_right_shift(void* value, size_t size, size_t shift)
 {
     size_t shift_bytes = shift / 8;
     size_t shift_bits  = shift % 8;
     
+    unsigned char* b = NULL;
+    unsigned char c = 0;
     unsigned char c_store = 0;
 
     for (size_t _ = 0; _ < shift_bytes; _++)
     {
         for (int offset = size - 1; offset >= 0; offset--)
         {
-            unsigned char* b = ((unsigned char*)value) + offset;
-            unsigned char c = *b;
+            b = ((unsigned char*)value) + offset;
+            c = *b;
             *b = c_store;
             c_store = c;
         }
@@ -213,13 +216,13 @@ void _binary_right_shift(void* value, size_t size, size_t shift)
 
     c_store = 0;
 
-    if (!shift_bits)
+    if (shift_bits == 0)
         return;
 
     for (int offset = size - 1; offset >= 0; offset--)
     {
-        unsigned char* b = ((unsigned char*)value) + offset;
-        unsigned char c = *b;
+        b = ((unsigned char*)value) + offset;
+        c = *b;
         c <<= 8 - shift_bits;
         *b >>= shift_bits;
         *b += c_store;

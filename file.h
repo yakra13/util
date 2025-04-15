@@ -162,6 +162,12 @@ typedef struct _fileinfo
     #define GET_FILE_INFO(path) _get_file_info(path)
 
     typedef struct stat _FileStat;
+
+    // #define DEBUG_LOG(format, ...) do { \
+    //     char __buf[1024] = { 0 }; \
+    //     snprintf(__buf, sizeof(__buf), "%s:%s line: %d " format "\n", __FILE__, __func__, __LINE__, ##__VA_ARGS__); \
+    //     OutputDebugStringA(__buf); \
+    // } while (0)
 #endif
 
 
